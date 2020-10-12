@@ -21,7 +21,7 @@ assert_eq!(parsed, expected);
 
 # Features
 
-Only ISO 8601 like date are supported as for now.
+Only ISO 8601 like dates are supported as for now. Check tests for examples.
 
   
 # License

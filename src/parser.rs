@@ -5,7 +5,7 @@
 use std::str;
 use nom::{
     bytes::complete::{take_while, take_while_m_n},
-    character::is_digit,
+    character::{complete::char, is_digit},
     combinator::opt,
     sequence::tuple, 
     IResult,
@@ -18,7 +18,7 @@ use crate::error::DateTimeError;
 #[derive(Clone)]
 enum DateTimePart {
     Year, Month, Day,
-    Hour, Minute, Second,
+    Hour, Minute, Second, Timezone,
     Separator(String),
 }
 
@@ -31,6 +31,7 @@ impl DateTimePart {
             DateTimePart::Hour => "%H",
             DateTimePart::Minute => "%M",
             DateTimePart::Second => "%S",
+            DateTimePart::Timezone => "%z",
             DateTimePart::Separator(s) => s,
         }
     }
@@ -123,8 +124,8 @@ fn day(i: &[u8]) -> CustomResult<&[u8]> {
 /// Hour is mandatory but rest is optional
 fn parse_time(input: &[u8]) -> IResult<&[u8], Pattern, DateTimeError<&[u8]>> {
     let mut pattern = Pattern::new();
-    let parsers = tuple((time_part, opt(separator), opt(time_part), opt(separator), opt(time_part)));
-    let (i, (h, s1, m, s2, s)) = parsers(input)?;
+    let parsers = tuple((time_part, opt(separator), opt(time_part), opt(separator), opt(time_part), opt(timezone)));
+    let (i, (h, s1, m, s2, s, z)) = parsers(input)?;
 
     if h > 24 { return Err(Error(DateTimeError::NotTimePart)) }
 
@@ -146,6 +147,10 @@ fn parse_time(input: &[u8]) -> IResult<&[u8], Pattern, DateTimeError<&[u8]>> {
         pattern.parts.push(DateTimePart::Second);
     } 
 
+    if let Some(_) = z {
+        pattern.parts.push(DateTimePart::Timezone);
+    } 
+
     Ok((i, pattern))
 }
 
@@ -154,6 +159,14 @@ fn time_part(i: &[u8]) -> IResult<&[u8], u32, DateTimeError<&[u8]>> {
     let v: u32 = str::from_utf8(vs).expect("Non unicode character")
         .parse::<u32>().expect("Can't convert to u32");
     Ok((i, v)) 
+}
+
+fn timezone(input: &[u8]) -> CustomResult<&[u8]> {
+    let (i, _) = char('+')(input)?;
+    let (i, _) = take_while_m_n(2, 2, is_digit)(i)?;
+    let (i, _) = char(':')(i)?;
+    let (i, _) = take_while_m_n(2, 2, is_digit)(i)?;
+    Ok((i, DateTimePart::Timezone)) 
 }
 
 fn separator(i: &[u8]) -> CustomResult<&[u8]> {

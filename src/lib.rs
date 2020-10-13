@@ -40,19 +40,19 @@ mod tests {
 use super::infer_best;
 
     #[test]
-    fn test_year() {
+    fn year() {
         let pattern = infer_best("2020").unwrap();
         assert_eq!(pattern, "%Y");
     }
 
     #[test]
-    fn test_year_month() {
+    fn year_month() {
         let pattern = infer_best("2020-10").unwrap();
         assert_eq!(pattern, "%Y-%m");
     }
 
     #[test]
-    fn test_year_month_day() {
+    fn year_month_day() {
         let pattern = infer_best("2020/10/23").unwrap();
         assert_eq!(pattern, "%Y/%m/%d");
     }
@@ -70,7 +70,7 @@ use super::infer_best;
     }
 
     #[test]
-    fn test_invalid() {
+    fn invalid_format() {
         let pattern = infer_best("invalid");
         assert_eq!(pattern, None);
     }
@@ -85,6 +85,12 @@ use super::infer_best;
     fn iso_date_block() {
         let pattern = infer_best("20201009").unwrap();
         assert_eq!(pattern, "%Y%m%d");
+    }
+
+    #[test]
+    fn time_zone() {
+        let pattern = infer_best("2020-10-09 15:24:50+00:00").unwrap();
+        assert_eq!(pattern, "%Y-%m-%d %H:%M:%S%z");
     }
 
 }

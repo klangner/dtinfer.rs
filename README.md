@@ -10,13 +10,9 @@ Library for infering date time format from the given string.
 
 ```rust
 use dtinfer;
-use chrono::{NaiveDate, NaiveTime, NaiveDateTime};
 
-let sample = "1987-05-23T12:30";
-let pattern = dtinfer::infer_best(sample).unwrap();
-let parsed = NaiveDateTime::parse_from_str(sample, &pattern).unwrap();
-let expected = NaiveDateTime::new(NaiveDate::from_ymd(1987, 5, 23), NaiveTime::from_hms(12, 30, 0));
-assert_eq!(parsed, expected);
+let pattern = infer_best("2020-10-09 15:24:50+00:00").unwrap();
+assert_eq!(pattern, "%Y-%m-%d %H:%M:%S%z")
 ```
 
 # Features

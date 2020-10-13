@@ -6,7 +6,14 @@
 Library for infering date time format from the given string. 
 
 
-# Example
+# Usage
+
+Add dependency to your project
+```
+dfinfer = "0.1"
+```
+
+And then:
 
 ```rust
 use dtinfer;
